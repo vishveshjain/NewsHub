@@ -30,6 +30,8 @@ Install root (client) dependencies:
 ```bash
 npm install
 ```
+Change .envExample to .env under server folder
+
 Install server dependencies:
 ```bash
 cd server
