@@ -92,7 +92,19 @@ npm run format
 ## Screenshots
 
 ### Home Page
-![NewsHub Home Page](./screenshots/home.png)
+![NewsHub Home Page](./screenshots/home<p align="center">
+  <img src="./screenshots/home.png" alt="NewsHub Home Page" width="600"/>
+  <br>
+  <em>Stay Connected to What Matters – Discover local and global news that impacts your world.</em>
+</p><p align="center">
+  <img src="./screenshots/home.png" alt="NewsHub Home Page" width="600"/><br>
+  <em>Stay Connected to What Matters – Discover local and global news that impacts your world.</em>
+</p>
+
+<p align="center">
+  <img src="./screenshots/submit-news.png" alt="NewsHub Submit News" width="600"/><br>
+  <em>Submit important stories with the community using a simple, guided form.</em>
+</p>.png)
 *Stay Connected to What Matters – Discover local and global news that impacts your world.*
 
 ### Submit News Page
