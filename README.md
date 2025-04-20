@@ -30,18 +30,6 @@ project/
 
 ## Getting Started
 
----
-
-## Screenshots
-
-### Home Page
-![Home Page](./screenshots/home.png)
-
-### Submit News
-![Submit News](./screenshots/submit-news.png)
-
----
-
 
 ### Prerequisites
 - Node.js (v16+ recommended)
