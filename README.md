@@ -16,7 +16,7 @@ A location-based news sharing platform built with React, TypeScript, Vite, Tailw
 
 ## Project Structure
 ```bash
-project/
+NewsHub/
 ├── server/                  # Backend service
 │   ├── models/              # Mongoose models
 │   ├── routes/              # Express route handlers
@@ -54,7 +54,7 @@ project/
 1. Clone the repository:
    ```sh
    git clone <your-repo-url>
-   cd project
+   cd NewsHub
    ```
 2. Install frontend dependencies:
    ```sh
