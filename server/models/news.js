@@ -25,12 +25,18 @@ const newsSchema = new mongoose.Schema({
   },
   content: { 
     type: String, 
-    required: true,
-    minlength: 100
+    required: [function() { return this.type === 'article'; }, 'Content is required for articles'],
+    validate: {
+      validator: function(v) {
+        if (this.type === 'video') return true;
+        return typeof v === 'string' && v.length >= 100;
+      },
+      message: 'Content must be at least 100 characters long'
+    }
   },
   thumbnail: { 
     type: String, 
-    required: true 
+    required: [function() { return this.type === 'article'; }, 'Thumbnail is required for articles'] 
   },
   type: { 
     type: String, 
@@ -39,7 +45,8 @@ const newsSchema = new mongoose.Schema({
   },
   videoUrl: { 
     type: String,
-    default: '' 
+    default: '',
+    required: [function() { return this.type === 'video'; }, 'Video URL is required for video news']
   },
   location: { 
     type: locationSchema, 

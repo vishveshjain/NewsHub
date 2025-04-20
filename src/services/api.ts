@@ -6,7 +6,8 @@ const API_URL = 'http://localhost:5000/api';
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Server error');
+    // Throw detailed error message if available
+    throw new Error(errorData.error || errorData.message || 'Server error');
   }
   return await response.json();
 };

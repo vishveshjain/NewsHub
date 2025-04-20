@@ -168,7 +168,13 @@ router.post('/', authMiddleware, async (req, res) => {
     
     res.status(201).json(populatedNews);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    // Handle validation errors (e.g., missing videoUrl)
+    if (error.name === 'ValidationError') {
+      const firstError = Object.values(error.errors)[0].message;
+      return res.status(400).json({ message: firstError });
+    }
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
