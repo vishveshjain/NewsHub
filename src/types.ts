@@ -14,6 +14,7 @@ export interface User {
   };
   followersCount: number;
   followingCount: number;
+  following?: User[];
 }
 
 // News related types

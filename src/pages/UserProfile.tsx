@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Calendar, Award, User as UserIcon, Edit, Settings, Share2, Shield, Users, BookOpen, ThumbsUp, MessageSquare, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -7,6 +7,7 @@ import { Card } from '../components/common/Card';
 import { Tab } from '../components/common/Tab';
 import { NewsGrid } from '../components/news/NewsGrid';
 import { User, NewsItem } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 export const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,30 @@ export const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('posts');
   const [userPosts, setUserPosts] = useState<NewsItem[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user: authUser, updateUser } = useAuth();
+
+  const handleAvatarClick = () => {
+    if (authUser?.id === user?.id) fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        try {
+          await updateUser({ avatar: base64 });
+          setUser(prev => prev ? { ...prev, avatar: base64 } : prev);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Calculate total upvotes and downvotes across user posts
   const totalUpvotes = userPosts.reduce((sum, post) => sum + post.upvotes, 0);
   const totalDownvotes = userPosts.reduce((sum, post) => sum + post.downvotes, 0);
@@ -79,10 +104,19 @@ export const UserProfile: React.FC = () => {
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-start">
               <div className="md:mr-8 mb-4 md:mb-0">
-                <img 
-                  src={user.avatar} 
-                  alt={user.username} 
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                <div onClick={handleAvatarClick} className="cursor-pointer inline-block">
+                  <img 
+                    src={user.avatar} 
+                    alt={user.username} 
+                    className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                  />
+                </div>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  onChange={handleFileChange} 
                 />
               </div>
               
@@ -276,7 +310,7 @@ export const UserProfile: React.FC = () => {
             
             {activeTab === 'following' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {user.following.map((followedUser) => (
+                {user.following?.map((followedUser) => (
                   <Card key={followedUser.id} className="p-6">
                     <div className="flex items-center">
                       <Link to={`/profile/${followedUser.id}`} className="flex-shrink-0 mr-4">

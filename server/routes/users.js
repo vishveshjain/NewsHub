@@ -2,6 +2,7 @@ import express from 'express';
 import User from '../models/user.js';
 import News from '../models/news.js';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'newshub-secret-key';
@@ -32,13 +33,17 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-// Get user profile
-router.get('/:username', async (req, res) => {
+// Get user profile by ID or username
+router.get('/:identifier', async (req, res) => {
   try {
-    const { username } = req.params;
-    
-    const user = await User.findOne({ username }).select('-password');
-    
+    const { identifier } = req.params;
+    let user = mongoose.Types.ObjectId.isValid(identifier)
+      ? await User.findById(identifier).select('-password')
+      : null;
+    if (!user) {
+      user = await User.findOne({ username: identifier }).select('-password');
+    }
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -49,14 +54,18 @@ router.get('/:username', async (req, res) => {
   }
 });
 
-// Get news submitted by a user
-router.get('/:username/news', async (req, res) => {
+// Get news submitted by a user by ID or username
+router.get('/:identifier/news', async (req, res) => {
   try {
-    const { username } = req.params;
+    const { identifier } = req.params;
     const { page = 1, limit = 10 } = req.query;
-    
-    const user = await User.findOne({ username });
-    
+    let user = mongoose.Types.ObjectId.isValid(identifier)
+      ? await User.findById(identifier)
+      : null;
+    if (!user) {
+      user = await User.findOne({ username: identifier });
+    }
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
