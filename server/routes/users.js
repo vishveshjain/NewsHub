@@ -48,7 +48,11 @@ router.get('/:identifier', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    res.status(200).json(user);
+    // Convert to plain object and map _id to id
+    const userObj = user._doc ? { ...user._doc } : user.toObject();
+    userObj.id = userObj._id.toString();
+    delete userObj._id;
+    res.status(200).json(userObj);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

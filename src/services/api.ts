@@ -117,7 +117,11 @@ export const newsAPI = {
 export const userAPI = {
   getProfile: async (username: string) => {
     const response = await fetch(`${API_URL}/users/${username}`);
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    if (data._id || data.id) {
+      return { ...data, id: data.id || data._id };
+    }
+    return data;
   },
   
   getUserNews: async (username: string, page: number = 1, limit: number = 10) => {

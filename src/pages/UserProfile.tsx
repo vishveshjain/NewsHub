@@ -17,16 +17,13 @@ export const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState('posts');
   const [userPosts, setUserPosts] = useState<NewsItem[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user: authUser, updateUser } = useAuth();
-
-  const handleAvatarClick = () => {
-    if (authUser?.id === user?.id) fileInputRef.current?.click();
-  };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('Selected file:', file);
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64 = reader.result as string;
@@ -96,6 +93,10 @@ export const UserProfile: React.FC = () => {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="pt-20 pb-12">
       {/* Profile Header */}
@@ -104,20 +105,28 @@ export const UserProfile: React.FC = () => {
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-start">
               <div className="md:mr-8 mb-4 md:mb-0">
-                <div onClick={handleAvatarClick} className="cursor-pointer inline-block">
-                  <img 
-                    src={user.avatar} 
-                    alt={user.username} 
-                    className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-                  />
-                </div>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
-                  ref={fileInputRef} 
-                  onChange={handleFileChange} 
+                <img
+                  src={user.avatar}
+                  alt={user.username}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
                 />
+                {authUser?.id === user.id && (
+                  <>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      className="absolute w-0 h-0 opacity-0"
+                      onChange={handleFileChange}
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="mt-2 text-white bg-blue-600 px-2 py-1 rounded"
+                    >
+                      Change Photo
+                    </button>
+                  </>
+                )}
               </div>
               
               <div className="flex-1 text-center md:text-left">
