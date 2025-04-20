@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Video, Upload, MapPin, Globe, AlertCircle } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { categories } from '../utils/mockData';
+import { useAuth } from '../context/AuthContext';
+import { newsAPI } from '../services/api';
 
 enum ContentType {
   ARTICLE = 'article',
@@ -96,7 +98,17 @@ export const SubmitNews: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -104,11 +116,32 @@ export const SubmitNews: React.FC = () => {
       return;
     }
     
+    if (!isAuthenticated || !user) {
+      setErrors(prev => ({ ...prev, auth: 'You must be logged in to submit news' }));
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Simulate API call with timeout
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication token not found');
+      
+      // Prepare news data
+      const newsData = {
+        title,
+        description,
+        content,
+        thumbnail: thumbnailPreview || '', // Convert null to empty string
+        type: contentType,
+        videoUrl: contentType === ContentType.VIDEO ? videoUrl : undefined,
+        location,
+        categories: selectedCategories
+      };
+      
+      // Submit news through API
+      await newsAPI.create(newsData, token);
+      
       setSubmitSuccess(true);
       
       // Reset form after success
@@ -122,7 +155,11 @@ export const SubmitNews: React.FC = () => {
         setThumbnailPreview(null);
         setSubmitSuccess(false);
       }, 5000);
-    }, 1500);
+    } catch (error: any) {
+      setErrors(prev => ({ ...prev, submit: error.message || 'Failed to submit news' }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

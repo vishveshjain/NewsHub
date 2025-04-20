@@ -5,7 +5,8 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { NewsGrid } from '../components/news/NewsGrid';
-import { fetchNewsById, fetchCommentsByNewsId, fetchTrendingNews, mockUsers } from '../utils/mockData';
+import { fetchCommentsByNewsId, fetchTrendingNews, mockUsers } from '../utils/mockData';
+import { newsAPI } from '../services/api';
 import { NewsItem, Comment } from '../types';
 
 export const NewsDetail: React.FC = () => {
@@ -28,14 +29,14 @@ export const NewsDetail: React.FC = () => {
         setIsLoading(true);
         setError(null);
         
-        // Fetch news details
-        const newsData = await fetchNewsById(id);
+        // Fetch news details from backend
+        const newsData = await newsAPI.getById(id);
         if (!newsData) {
           setError('News not found');
           setIsLoading(false);
           return;
         }
-        
+
         setNews(newsData);
         setLocalUpvotes(newsData.upvotes);
         setLocalDownvotes(newsData.downvotes);
@@ -56,6 +57,7 @@ export const NewsDetail: React.FC = () => {
         
         setIsLoading(false);
       } catch (err) {
+        console.error('Failed to load news details:', err, 'for id:', id);
         setError('Failed to load news details');
         setIsLoading(false);
       }

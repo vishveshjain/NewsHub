@@ -104,9 +104,9 @@ export const Header: React.FC = () => {
                 )}
               </div>
             ) : (
-              <Button variant="primary" size="sm" icon={<LogIn size={16} />}>
-                Sign In
-              </Button>
+              <Link to="/login">
+                <Button variant="primary" size="sm" icon={<LogIn size={16} />}>Sign In</Button>
+              </Link>
             )}
           </div>
 
@@ -135,6 +135,7 @@ export const Header: React.FC = () => {
                 <>
                   <Link to={`/profile/${user?.id}`} className="py-2 text-gray-700 hover:text-blue-600 font-medium">Profile</Link>
                   <Link to="/bookmarks" className="py-2 text-gray-700 hover:text-blue-600 font-medium">Bookmarks</Link>
+                  <Link to="/settings" className="py-2 text-gray-700 hover:text-blue-600 font-medium">Settings</Link>
                   <button 
                     onClick={logout}
                     className="py-2 text-left text-gray-700 hover:text-blue-600 font-medium"
@@ -143,7 +144,9 @@ export const Header: React.FC = () => {
                   </button>
                 </>
               ) : (
-                <Button variant="primary" fullWidth>Sign In</Button>
+                <Link to="/login">
+                  <Button variant="primary" fullWidth>Sign In</Button>
+                </Link>
               )}
             </nav>
           </div>

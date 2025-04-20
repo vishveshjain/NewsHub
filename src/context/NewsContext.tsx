@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { NewsItem, SearchFilters } from '../types';
-import { fetchTrendingNews } from '../utils/mockData';
+import { newsAPI } from '../services/api';
 
 interface NewsContextType {
   trendingNews: NewsItem[];
@@ -43,27 +43,21 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadInitialData = async () => {
     try {
       setIsLoading(true);
-      // Load trending news
-      const trending = await fetchTrendingNews();
-      
-      // Add isBookmarked property to each news item
-      const trendingWithBookmarks = trending.map(news => ({
-        ...news,
-        isBookmarked: false
-      }));
-      
-      setTrendingNews(trendingWithBookmarks);
-      
-      // For demo, we'll use the same data source but sort differently for other sections
-      const recent = [...trendingWithBookmarks].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setError(null);
+      // Load trending news from backend
+      const trending = await newsAPI.getAll(1, 10, { sortBy: 'trending' });
+      setTrendingNews(trending);
+
+      // Recent news (sorted by newest)
+      const recent = await newsAPI.getAll(1, 10, { sortBy: 'newest' });
       setRecentNews(recent);
-      
-      // For demo, personalized recommendations can be a shuffled subset
-      const forYou = [...trendingWithBookmarks]
+
+      // ForYou news (random subset of trending)
+      const forYou = trending
         .sort(() => 0.5 - Math.random())
         .slice(0, 4);
       setForYouNews(forYou);
-      
+
       setIsLoading(false);
     } catch (err) {
       console.error('Error loading news data:', err);
@@ -107,81 +101,33 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const searchNews = async (filters: SearchFilters): Promise<NewsItem[]> => {
-    // In a real app, this would call an API with the filters
-    // For this demo, we'll filter the trending news based on the provided filters
-    let results = [...trendingNews];
-
-    // Filter by location
-    if (filters.location) {
-      const { city, state, country } = filters.location;
-      if (city) {
-        results = results.filter(news => 
-          news.location.city.toLowerCase().includes(city.toLowerCase())
-        );
-      }
-      if (state) {
-        results = results.filter(news => 
-          news.location.state.toLowerCase().includes(state.toLowerCase())
-        );
-      }
-      if (country) {
-        results = results.filter(news => 
-          news.location.country.toLowerCase().includes(country.toLowerCase())
-        );
-      }
-    }
-
-    // Filter by date range
-    if (filters.dateRange) {
-      const { from, to } = filters.dateRange;
-      if (from) {
-        const fromDate = new Date(from);
-        results = results.filter(news => new Date(news.createdAt) >= fromDate);
-      }
-      if (to) {
-        const toDate = new Date(to);
-        results = results.filter(news => new Date(news.createdAt) <= toDate);
-      }
-    }
-
-    // Filter by categories
+    // Use backend API for searching news
+    const apiFilters: any = {};
     if (filters.categories && filters.categories.length > 0) {
-      results = results.filter(news => 
-        news.categories.some(category => 
-          filters.categories?.includes(category)
-        )
-      );
+      apiFilters.category = filters.categories.join(',');
     }
-
-    // Filter by content type
-    if (filters.contentType && filters.contentType !== 'all') {
-      results = results.filter(news => news.type === filters.contentType);
+    if (filters.location) {
+      // Assuming backend supports a location string
+      const { city, state, country } = filters.location;
+      apiFilters.location = [city, state, country].filter(Boolean).join(',');
     }
-
-    // Sort by selected criteria
     if (filters.sortBy) {
-      switch (filters.sortBy) {
-        case 'newest':
-          results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          break;
-        case 'mostViewed':
-          results.sort((a, b) => b.viewCount - a.viewCount);
-          break;
-        case 'trending':
-        default:
-          results.sort((a, b) => {
-            const aScore = a.upvotes - a.downvotes + (a.viewCount / 1000);
-            const bScore = b.upvotes - b.downvotes + (b.viewCount / 1000);
-            return bScore - aScore;
-          });
-          break;
-      }
+      apiFilters.sortBy = filters.sortBy;
     }
-
-    return new Promise(resolve => {
-      setTimeout(() => resolve(results), 500);
-    });
+    if (filters.contentType && filters.contentType !== 'all') {
+      apiFilters.contentType = filters.contentType;
+    }
+    if (filters.query) {
+      apiFilters.search = filters.query;
+    }
+    // Date range, if supported by backend
+    if (filters.dateRange) {
+      if (filters.dateRange.from) apiFilters.from = filters.dateRange.from;
+      if (filters.dateRange.to) apiFilters.to = filters.dateRange.to;
+    }
+    return await newsAPI.getAll(1, 20, apiFilters);
   };
+
 
   return (
     <NewsContext.Provider

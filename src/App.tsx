@@ -7,6 +7,15 @@ import { NewsDetail } from './pages/NewsDetail';
 import { Search } from './pages/Search';
 import { UserProfile } from './pages/UserProfile';
 import { SubmitNews } from './pages/SubmitNews';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { AdminPanel } from './pages/AdminPanel';
+import { Settings } from './pages/Settings';
+import { Help } from './pages/Help';
+import { Contact } from './pages/Contact';
+import { Privacy } from './pages/Privacy';
+import { Terms } from './pages/Terms';
+import { About } from './pages/About';
 import { AuthProvider } from './context/AuthContext';
 import { NewsProvider } from './context/NewsContext';
 import ErrorBoundary from './ErrorBoundary';
@@ -31,6 +40,15 @@ function App() {
                         <Route path="/search" element={<ErrorBoundary><Search /></ErrorBoundary>} />
                         <Route path="/profile/:id" element={<ErrorBoundary><UserProfile /></ErrorBoundary>} />
                         <Route path="/submit" element={<ErrorBoundary><SubmitNews /></ErrorBoundary>} />
+                        <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+                        <Route path="/signup" element={<ErrorBoundary><Signup /></ErrorBoundary>} />
+                        <Route path="/settings" element={<ErrorBoundary><Settings /></ErrorBoundary>} />
+                        <Route path="/help" element={<ErrorBoundary><Help /></ErrorBoundary>} />
+                        <Route path="/contact" element={<ErrorBoundary><Contact /></ErrorBoundary>} />
+                        <Route path="/about" element={<ErrorBoundary><About /></ErrorBoundary>} />
+                        <Route path="/privacy" element={<ErrorBoundary><Privacy /></ErrorBoundary>} />
+                        <Route path="/terms" element={<ErrorBoundary><Terms /></ErrorBoundary>} />
+                        <Route path="/admin" element={<ErrorBoundary><AdminPanel /></ErrorBoundary>} />
                       </Routes>
                     </main>
                     <ErrorBoundary>

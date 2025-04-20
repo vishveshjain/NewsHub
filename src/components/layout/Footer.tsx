@@ -17,19 +17,19 @@ export const Footer: React.FC = () => {
               A location-based news sharing platform connecting you to what matters in your community and beyond.
             </p>
             <div className="mt-6 flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://x.com/vishveshjain" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                 <Twitter size={20} />
                 <span className="sr-only">Twitter</span>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://www.facebook.com/vishvesh.jain/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                 <Facebook size={20} />
                 <span className="sr-only">Facebook</span>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://www.instagram.com/vishvesh__jain/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                 <Instagram size={20} />
                 <span className="sr-only">Instagram</span>
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="https://github.com/vishveshjain" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                 <GitHub size={20} />
                 <span className="sr-only">GitHub</span>
               </a>
@@ -73,7 +73,7 @@ export const Footer: React.FC = () => {
 
         <div className="border-t border-gray-800 mt-12 pt-8">
           <p className="text-gray-400 text-center">
-            © {new Date().getFullYear()} NewsHub. All rights reserved.
+            &copy; {new Date().getFullYear()} NewsHub. All rights reserved.
           </p>
         </div>
       </div>
