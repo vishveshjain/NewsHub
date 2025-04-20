@@ -97,14 +97,12 @@ npm run format
   <em>Stay Connected to What Matters – Discover local and global news that impacts your world.</em>
 </p>
 
+
+### Submit News Page
 <p align="center">
   <img src="./screenshots/submit-news.png" alt="NewsHub Submit News" width="600"/><br>
   <em>Submit important stories with the community using a simple, guided form.</em>
 </p>
-
-### Submit News Page
-![NewsHub Submit News](./screenshots/submit-news.png)
-*Submit important stories with the community using a simple, guided form.*
 
 ## License
 MIT
