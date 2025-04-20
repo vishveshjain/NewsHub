@@ -34,6 +34,17 @@ export const NewsDetail: React.FC = () => {
     }
   };
 
+  const getVideoThumbnail = (url: string) => {
+    let id = '';
+    try {
+      const u = new URL(url);
+      id = u.searchParams.get('v') || u.pathname.split('/').pop() || '';
+    } catch {
+      id = '';
+    }
+    return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+  };
+
   useEffect(() => {
     const loadNewsData = async () => {
       if (!id) return;
@@ -200,7 +211,7 @@ export const NewsDetail: React.FC = () => {
             <div className="relative w-[932px] h-[524px]">
               {!isPlaying ? (
                 <img
-                  src={news.thumbnail}
+                  src={news.thumbnail || getVideoThumbnail(news.videoUrl!)}
                   alt={news.title}
                   className="absolute top-0 left-0 w-full h-full object-cover"
                 />

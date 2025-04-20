@@ -6,6 +6,17 @@ import { NewsItem } from '../../types';
 import { Card } from '../common/Card';
 import { useNews } from '../../context/NewsContext';
 
+const getVideoThumbnail = (url: string) => {
+  let id = '';
+  try {
+    const u = new URL(url);
+    id = u.searchParams.get('v') || u.pathname.split('/').pop() || '';
+  } catch {
+    id = '';
+  }
+  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+};
+
 interface NewsCardProps {
   news: NewsItem;
   variant?: 'standard' | 'compact' | 'featured';
@@ -50,7 +61,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news, variant = 'standard' }
       <Link to={`/news/${news.id}`} className="block h-full">
         <div className="relative h-80">
           <img 
-            src={news.thumbnail} 
+            src={news.thumbnail || (news.videoUrl ? getVideoThumbnail(news.videoUrl) : '')} 
             alt={news.title} 
             className="w-full h-full object-cover"
           />
@@ -127,7 +138,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news, variant = 'standard' }
       <Link to={`/news/${news.id}`} className="block">
         <div className="relative aspect-video overflow-hidden">
           <img 
-            src={news.thumbnail} 
+            src={news.thumbnail || (news.videoUrl ? getVideoThumbnail(news.videoUrl) : '')} 
             alt={news.title} 
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -208,7 +219,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news, variant = 'standard' }
       <Link to={`/news/${news.id}`} className="flex w-full">
         <div className="w-1/3 flex-shrink-0">
           <img 
-            src={news.thumbnail} 
+            src={news.thumbnail || (news.videoUrl ? getVideoThumbnail(news.videoUrl) : '')} 
             alt={news.title} 
             className="w-full h-full object-cover"
           />
