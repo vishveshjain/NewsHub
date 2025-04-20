@@ -7,6 +7,7 @@ import { Card } from '../components/common/Card';
 import { NewsGrid } from '../components/news/NewsGrid';
 import { fetchCommentsByNewsId, fetchTrendingNews, mockUsers } from '../utils/mockData';
 import { newsAPI } from '../services/api';
+import { useNews } from '../context/NewsContext';
 import { NewsItem, Comment } from '../types';
 
 export const NewsDetail: React.FC = () => {
@@ -16,11 +17,13 @@ export const NewsDetail: React.FC = () => {
   const [relatedNews, setRelatedNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [localUpvotes, setLocalUpvotes] = useState(0);
   const [localDownvotes, setLocalDownvotes] = useState(0);
   const [commentContent, setCommentContent] = useState('');
+
+  const { bookmarkedNews, bookmarkNews } = useNews();
+  const isBookmarked = news ? bookmarkedNews.includes(news.id) : false;
 
   const getEmbedUrl = (url: string) => {
     try {
@@ -90,21 +93,12 @@ export const NewsDetail: React.FC = () => {
     loadNewsData();
   }, [id]);
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-  };
-  
   const handleUpvote = () => {
     setLocalUpvotes(prev => prev + 1);
   };
   
   const handleDownvote = () => {
     setLocalDownvotes(prev => prev + 1);
-  };
-  
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    // In a real app, you would show a toast notification here
   };
   
   const handleSubmitComment = () => {
@@ -122,6 +116,14 @@ export const NewsDetail: React.FC = () => {
     setComments([newComment, ...comments]);
     setCommentContent('');
   };
+
+  const handleBookmark = () => {
+    if (news) bookmarkNews(news.id);
+  };
+
+  const shareUrl = `${window.location.origin}/news/${id}`;
+  const shareUrlEncoded = encodeURIComponent(shareUrl);
+  const shareText = encodeURIComponent(news?.title || '');
 
   if (isLoading) {
     return (
@@ -171,14 +173,14 @@ export const NewsDetail: React.FC = () => {
             
             <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center mb-4 md:mb-0">
-                <Link to={`/profile/${news.author.id}`} className="flex items-center group">
+                <Link to={`/profile/${news.author.username}`} className="flex items-center group">
                   <img 
                     src={news.author.avatar}
                     alt={news.author.username}
                     className="w-12 h-12 rounded-full mr-4"
                   />
                   <div className="ml-3">
-                    <Link to={`/profile/${news.author.id}`} className="font-semibold text-blue-600 hover:text-blue-800">
+                    <Link to={`/profile/${news.author.username}`} className="font-semibold text-blue-600 hover:text-blue-800">
                       {news.author.username}
                     </Link>
                     <p className="text-sm text-blue-200">
@@ -274,13 +276,19 @@ export const NewsDetail: React.FC = () => {
                   </button>
                 </div>
                 
-                <button 
-                  onClick={handleShare}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-                >
-                  <Share2 size={18} />
-                  <span>Share</span>
-                </button>
+                <div className="relative inline-block group">
+                  <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
+                    <Share2 size={18} />
+                    <span>Share</span>
+                  </button>
+                  <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 hidden group-hover:block bg-white shadow-md rounded-lg py-1 z-50">
+                    <a href={`https://wa.me/?text=${shareUrlEncoded}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">WhatsApp</a>
+                    <a href={`https://twitter.com/intent/tweet?url=${shareUrlEncoded}&text=${shareText}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">X.com</a>
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrlEncoded}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">Facebook</a>
+                    <a href={`https://www.instagram.com/`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">Instagram</a>
+                    <button onClick={() => navigator.clipboard.writeText(shareUrl)} className="block w-full text-left px-3 py-1 text-sm hover:bg-gray-100">Copy Link</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -288,7 +296,7 @@ export const NewsDetail: React.FC = () => {
           {/* Author Information */}
           <Card className="mb-8 p-6">
             <div className="flex items-start">
-              <Link to={`/profile/${news.author.id}`} className="flex-shrink-0 mr-4">
+              <Link to={`/profile/${news.author.username}`} className="flex-shrink-0 mr-4">
                 <img 
                   src={news.author.avatar}
                   alt={news.author.username}
@@ -296,7 +304,7 @@ export const NewsDetail: React.FC = () => {
                 />
               </Link>
               <div className="ml-3">
-                <Link to={`/profile/${news.author.id}`} className="font-medium text-blue-600 hover:text-blue-800">
+                <Link to={`/profile/${news.author.username}`} className="font-medium text-blue-600 hover:text-blue-800">
                   {news.author.username}
                 </Link>
                 <p className="text-sm text-gray-500 mb-2">
@@ -354,7 +362,7 @@ export const NewsDetail: React.FC = () => {
                 {comments.map((comment) => (
                   <Card key={comment.id} padding="md">
                     <div className="flex items-start">
-                      <Link to={`/profile/${comment.author.id}`} className="flex-shrink-0 mr-3">
+                      <Link to={`/profile/${comment.author.username}`} className="flex-shrink-0 mr-3">
                         <img 
                           src={comment.author.avatar}
                           alt={comment.author.username}
@@ -363,7 +371,7 @@ export const NewsDetail: React.FC = () => {
                       </Link>
                       <div className="flex-grow">
                         <div className="flex items-center mb-1">
-                          <Link to={`/profile/${comment.author.id}`} className="font-medium text-gray-900 hover:text-blue-600 mr-2">
+                          <Link to={`/profile/${comment.author.username}`} className="font-medium text-gray-900 hover:text-blue-600 mr-2">
                             {comment.author.username}
                           </Link>
                           <span className="text-sm text-gray-500">
@@ -390,7 +398,7 @@ export const NewsDetail: React.FC = () => {
                           <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-3">
                             {comment.replies.map((reply) => (
                               <div key={reply.id} className="flex items-start">
-                                <Link to={`/profile/${reply.author.id}`} className="flex-shrink-0 mr-3">
+                                <Link to={`/profile/${reply.author.username}`} className="flex-shrink-0 mr-3">
                                   <img 
                                     src={reply.author.avatar}
                                     alt={reply.author.username}
@@ -399,7 +407,7 @@ export const NewsDetail: React.FC = () => {
                                 </Link>
                                 <div>
                                   <div className="flex items-center mb-1">
-                                    <Link to={`/profile/${reply.author.id}`} className="font-medium text-gray-900 hover:text-blue-600 mr-2">
+                                    <Link to={`/profile/${reply.author.username}`} className="font-medium text-gray-900 hover:text-blue-600 mr-2">
                                       {reply.author.username}
                                     </Link>
                                     <span className="text-xs text-gray-500">

@@ -23,25 +23,27 @@ interface NewsCardProps {
 }
 
 export const NewsCard: React.FC<NewsCardProps> = ({ news, variant = 'standard' }) => {
-  const { voteOnNews, bookmarkNews } = useNews();
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const { voteOnNews, bookmarkNews, bookmarkedNews } = useNews();
+  const isBookmarked = bookmarkedNews.includes(news.id);
   const [localUpvotes, setLocalUpvotes] = useState(news.upvotes);
   const [localDownvotes, setLocalDownvotes] = useState(news.downvotes);
-  
+  const shareUrl = `${window.location.origin}/news/${news.id}`;
+  const shareUrlEncoded = encodeURIComponent(shareUrl);
+  const shareText = encodeURIComponent(news.title);
+
   const handleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsBookmarked(!isBookmarked);
     bookmarkNews(news.id);
   };
-  
+
   const handleUpvote = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setLocalUpvotes(localUpvotes + 1);
     voteOnNews(news.id, 'up');
   };
-  
+
   const handleDownvote = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -49,13 +51,6 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news, variant = 'standard' }
     voteOnNews(news.id, 'down');
   };
 
-  const handleShare = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigator.clipboard.writeText(window.location.origin + '/news/' + news.id);
-    // In a real app, you would show a toast notification here
-  };
-  
   const renderFeatured = () => (
     <Card elevated className="w-full h-full overflow-hidden group transform transition-transform hover:scale-[1.01]">
       <Link to={`/news/${news.id}`} className="block h-full">
@@ -119,12 +114,17 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news, variant = 'standard' }
                 >
                   <Bookmark size={18} />
                 </button>
-                <button 
-                  onClick={handleShare} 
-                  className="p-1.5 rounded-full text-gray-300 hover:text-white transition-colors"
-                >
-                  <Share2 size={18} />
-                </button>
+                <div className="relative inline-block group">
+                  <button className="p-1.5 rounded-full text-gray-300 hover:text-white transition-colors">
+                    <Share2 size={18} />
+                  </button>
+                  <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 hidden group-hover:block bg-white shadow-md rounded-lg py-1 z-50">
+                    <a href={`https://wa.me/?text=${shareUrlEncoded}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">WhatsApp</a>
+                    <a href={`https://twitter.com/intent/tweet?url=${shareUrlEncoded}&text=${shareText}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">X.com</a>
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrlEncoded}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">Facebook</a>
+                    <a href={`https://www.instagram.com/`} target="_blank" rel="noopener noreferrer" className="block px-3 py-1 text-sm hover:bg-gray-100">Instagram</a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

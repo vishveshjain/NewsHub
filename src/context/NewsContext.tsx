@@ -12,6 +12,7 @@ interface NewsContextType {
   bookmarkNews: (id: string) => void;
   refreshNews: () => Promise<void>;
   searchNews: (filters: SearchFilters) => Promise<NewsItem[]>;
+  bookmarkedNews: string[];
 }
 
 const NewsContext = createContext<NewsContextType>({
@@ -24,6 +25,7 @@ const NewsContext = createContext<NewsContextType>({
   bookmarkNews: () => {},
   refreshNews: async () => {},
   searchNews: async () => [],
+  bookmarkedNews: [],
 });
 
 export const useNews = () => useContext(NewsContext);
@@ -38,6 +40,13 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('bookmarks');
+    if (stored) {
+      try { setBookmarkedNews(JSON.parse(stored)); } catch {}
+    }
   }, []);
 
   const loadInitialData = async () => {
@@ -93,11 +102,14 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const bookmarkNews = (id: string) => {
+    let updated: string[];
     if (bookmarkedNews.includes(id)) {
-      setBookmarkedNews(bookmarkedNews.filter(newsId => newsId !== id));
+      updated = bookmarkedNews.filter(newsId => newsId !== id);
     } else {
-      setBookmarkedNews([...bookmarkedNews, id]);
+      updated = [...bookmarkedNews, id];
     }
+    setBookmarkedNews(updated);
+    localStorage.setItem('bookmarks', JSON.stringify(updated));
   };
 
   const searchNews = async (filters: SearchFilters): Promise<NewsItem[]> => {
@@ -128,7 +140,6 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return await newsAPI.getAll(1, 20, apiFilters);
   };
 
-
   return (
     <NewsContext.Provider
       value={{
@@ -141,6 +152,7 @@ export const NewsProvider: React.FC<{ children: React.ReactNode }> = ({ children
         bookmarkNews,
         refreshNews,
         searchNews,
+        bookmarkedNews,
       }}
     >
       {children}
