@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ThumbsUp, ThumbsDown, MapPin, Eye, MessageSquare, Bookmark, Share2, AlertTriangle } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MapPin, Eye, MessageSquare, Bookmark, Share2, AlertTriangle, Play } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
@@ -17,9 +17,22 @@ export const NewsDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [localUpvotes, setLocalUpvotes] = useState(0);
   const [localDownvotes, setLocalDownvotes] = useState(0);
   const [commentContent, setCommentContent] = useState('');
+
+  const getEmbedUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const v = urlObj.searchParams.get('v');
+      if (v) return `https://www.youtube.com/embed/${v}`;
+      const parts = url.split('/');
+      return `https://www.youtube.com/embed/${parts[parts.length - 1]}`;
+    } catch {
+      return url;
+    }
+  };
 
   useEffect(() => {
     const loadNewsData = async () => {
@@ -184,23 +197,32 @@ export const NewsDetail: React.FC = () => {
           {/* Content Section */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             {/* Featured Image */}
-            <div className="relative">
-              <img 
-                src={news.thumbnail}
-                alt={news.title}
-                className="w-full h-auto object-cover max-h-[500px]"
-              />
-              
-              {news.type === 'video' && news.videoUrl && (
+            <div className="relative w-[932px] h-[524px]">
+              {!isPlaying ? (
+                <img
+                  src={news.thumbnail}
+                  alt={news.title}
+                  className="absolute top-0 left-0 w-full h-full object-cover"
+                />
+              ) : (
+                <iframe
+                  src={getEmbedUrl(news.videoUrl!)}
+                  width="932"
+                  height="524"
+                  className="absolute top-0 left-0"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )}
+              {news.type === 'video' && news.videoUrl && !isPlaying && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <a 
-                    href={news.videoUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-20 h-20 rounded-full bg-blue-600 bg-opacity-75 flex items-center justify-center hover:bg-opacity-90 transition-all"
+                  <button
+                    onClick={() => setIsPlaying(true)}
+                    className="p-4 rounded-full bg-gray-800 bg-opacity-50 hover:bg-opacity-75 transition-all"
                   >
-                    <div className="w-0 h-0 border-y-10 border-y-transparent border-l-16 border-l-white ml-2"></div>
-                  </a>
+                    <Play size={50} className="text-white" />
+                  </button>
                 </div>
               )}
             </div>
