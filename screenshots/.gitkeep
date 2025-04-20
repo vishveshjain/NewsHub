@@ -1,1 +1,4 @@
 
+git add project/screenshots/home.png project/screenshots/submit-news.png
+git commit -m "Add screenshots for README"
+git push
