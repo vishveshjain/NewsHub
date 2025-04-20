@@ -76,5 +76,15 @@ npm run format
 - The project uses mock data for demonstration and development purposes.
 - Focus is on clean, maintainable code and a modern, responsive UI.
 
+## Screenshots
+
+### Home Page
+![NewsHub Home Page](./screenshots/homepage.png)
+*Stay Connected to What Matters – Discover local and global news that impacts your world.*
+
+### Submit News Page
+![NewsHub Submit News](./screenshots/submit-news.png)
+*Submit important stories with the community using a simple, guided form.*
+
 ## License
 MIT

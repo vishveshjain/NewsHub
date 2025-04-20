@@ -6,37 +6,49 @@ import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { Tab } from '../components/common/Tab';
 import { NewsGrid } from '../components/news/NewsGrid';
-import { mockUsers, mockNews } from '../utils/mockData';
 import { User, NewsItem } from '../types';
 
 export const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('posts');
   const [userPosts, setUserPosts] = useState<NewsItem[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
-  
+  // Calculate total upvotes and downvotes across user posts
+  const totalUpvotes = userPosts.reduce((sum, post) => sum + post.upvotes, 0);
+  const totalDownvotes = userPosts.reduce((sum, post) => sum + post.downvotes, 0);
+
   useEffect(() => {
     const loadUserData = async () => {
-      setIsLoading(true);
-      
-      // Simulate API call
-      setTimeout(() => {
-        const foundUser = mockUsers.find(u => u.id === id);
-        
-        if (foundUser) {
-          setUser(foundUser);
-          
-          // Get posts by this user
-          const posts = mockNews.filter(news => news.author.id === foundUser.id);
-          setUserPosts(posts);
+      try {
+        setIsLoading(true);
+        setError(null);
+        // Fetch profile
+        const res = await fetch(`/api/users/${id}`);
+        if (res.status === 404) {
+          setError('User not found');
+          return;
         }
-        
+        if (!res.ok) throw new Error('Failed to fetch user');
+        const userData: User = await res.json();
+        setUser(userData);
+        // Fetch user's news
+        const newsRes = await fetch(`/api/users/${id}/news`);
+        if (newsRes.ok) {
+          const data = await newsRes.json();
+          setUserPosts(data.news);
+        } else {
+          setUserPosts([]);
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Error loading profile');
+      } finally {
         setIsLoading(false);
-      }, 500);
+      }
     };
-    
     loadUserData();
   }, [id]);
 
@@ -48,16 +60,12 @@ export const UserProfile: React.FC = () => {
     );
   }
 
-  if (!user) {
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-24 text-center">
-        <div className="text-red-500 mb-4 text-xl">
-          <span>User not found</span>
-        </div>
+        <div className="text-red-500 mb-4 text-xl">{error}</div>
         <Link to="/">
-          <Button variant="primary">
-            Back to Home
-          </Button>
+          <Button variant="primary">Back to Home</Button>
         </Link>
       </div>
     );
@@ -126,7 +134,7 @@ export const UserProfile: React.FC = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-6 py-4">
               <div className="text-center p-3">
                 <div className="text-2xl font-bold text-gray-900">{userPosts.length}</div>
                 <div className="text-sm text-gray-500">Publications</div>
@@ -142,6 +150,14 @@ export const UserProfile: React.FC = () => {
               <div className="text-center p-3">
                 <div className="text-2xl font-bold text-gray-900">{user.credibilityScore}</div>
                 <div className="text-sm text-gray-500">Credibility Score</div>
+              </div>
+              <div className="text-center p-3">
+                <div className="text-2xl font-bold text-gray-900">{totalUpvotes}</div>
+                <div className="text-sm text-gray-500">Upvotes</div>
+              </div>
+              <div className="text-center p-3">
+                <div className="text-2xl font-bold text-gray-900">{totalDownvotes}</div>
+                <div className="text-sm text-gray-500">Downvotes</div>
               </div>
             </div>
           </div>
@@ -260,7 +276,7 @@ export const UserProfile: React.FC = () => {
             
             {activeTab === 'following' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockUsers.filter(u => u.id !== user.id).map((followedUser) => (
+                {user.following.map((followedUser) => (
                   <Card key={followedUser.id} className="p-6">
                     <div className="flex items-center">
                       <Link to={`/profile/${followedUser.id}`} className="flex-shrink-0 mr-4">
@@ -538,5 +554,3 @@ export const UserProfile: React.FC = () => {
     </div>
   );
 };
-
-// These components are now properly imported from lucide-react at the top of the file
