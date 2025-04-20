@@ -93,7 +93,7 @@ npm run format
 
 ### Home Page
 <p align="center">
-  <img src="./screenshots/home.png" alt="NewsHub Home Page" width="600"/><br>
+  <img src="./screenshots/home.jpg" alt="NewsHub Home Page" width="600"/><br>
   <em>Stay Connected to What Matters – Discover local and global news that impacts your world.</em>
 </p>
 
